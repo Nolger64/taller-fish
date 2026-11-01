@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Co-banking · AV Villas</title>
+  <meta name="description" content="Simulación educativa del portal Co-banking para el Taller de phishing y quishing. No envía ni almacena datos y no está afiliada a AV Villas.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="img/favicon.png">
+
+  <!--
+    PROYECTO EDUCATIVO · Taller de phishing y quishing
+    ------------------------------------------------------------------
+    Reproducción de la interfaz con fines de concientización.
+    NO tiene backend, NO envía datos y NO guarda información.
+    El formulario solo abre una explicación (modal) al enviarse.
+
+    Tipografía: Onest (SIL Open Font License).
+    Tokens tomados de styles.*.css: rojo #ED1B2F, radios 8/16/24,
+    grises #F8F8F8 / #B8B7B7 / #6C6F72.
+  -->
+
+  <style>
+    @font-face{
+      font-family:"Onest";
+      src:url("img/Onest-Regular.c8a306849aa76776.ttf") format("truetype");
+      font-weight:400;font-style:normal;font-display:swap;
+    }
+    @font-face{
+      font-family:"Onest";
+      src:url("img/Onest-Medium.fc29f3333f87a55f.ttf") format("truetype");
+      font-weight:500;font-style:normal;font-display:swap;
+    }
+    @font-face{
+      font-family:"Onest";
+      src:url("img/Onest-SemiBold.c312bc1485dc3ac7.ttf") format("truetype");
+      font-weight:600;font-style:normal;font-display:swap;
+    }
+    @font-face{
+      font-family:"Onest";
+      src:url("img/Onest-Bold.fa08e2e68677ee91.ttf") format("truetype");
+      font-weight:700;font-style:normal;font-display:swap;
+    }
+
+    :root{
+      --red:#ED1B2F;
+      --red-600:#D71A2C;
+      --ink:#141414;
+      --soft:#3F4143;
+      --muted:#6C6F72;
+      --line:#B8B7B7;
+      --line-soft:#E6E5E5;
+      --bg:#F8F8F8;
+      --blue:#1F5FA8;
+      --r-card:24px;
+      --r-img:18px;
+      --shadow:0 24px 60px -44px rgba(20,20,20,.45), 0 2px 6px rgba(20,20,20,.04);
+    }
+
+    *,*::before,*::after{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%;background:var(--bg)}
+    body{
+      margin:0;min-height:100vh;color:var(--ink);
+      font-family:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      font-size:16px;-webkit-font-smoothing:antialiased;background:transparent;
+    }
+    [hidden]{display:none!important}
+    img{max-width:100%}
+
+    /* ---------- Fondo rojo decorativo ---------- */
+    .page-bg{
+      position:fixed;top:0;right:0;bottom:0;
+      left:max(58%, calc(50% + 110px));
+      z-index:-1;overflow:hidden;background:var(--red);
+    }
+    .page-bg span{position:absolute;border:2px solid rgba(255,255,255,.16);border-radius:50%}
+    .page-bg span:nth-child(1){width:900px;height:900px;right:-260px;top:-420px}
+    .page-bg span:nth-child(2){width:640px;height:640px;right:6%;bottom:-380px}
+    .page-bg span:nth-child(3){width:260px;height:260px;right:24%;top:4%;opacity:.6}
+
+    /* ---------- Estructura ---------- */
+    .page{max-width:1280px;margin:0 auto;padding:26px 26px 24px}
+
+    .eyebrow{margin:0 0 20px;font-size:19px;font-weight:700;letter-spacing:-.01em;color:#1F2328}
+
+    .grid{display:grid;grid-template-columns:1.12fr 1fr 1.22fr;gap:30px;align-items:stretch}
+
+    .card{background:#fff;border-radius:var(--r-card);box-shadow:var(--shadow)}
+
+    /* ---------- Tarjeta grande ---------- */
+    .hero{display:flex;flex-direction:column;padding:14px;min-height:780px;overflow:hidden}
+    .hero__media{flex:1;min-height:0;border-radius:var(--r-img);overflow:hidden;background:#F1F1F1}
+    .hero__media img{width:100%;height:100%;object-fit:cover;display:block}
+    .hero__body{padding:20px 10px 8px}
+    .hero h2{margin:0 0 8px;font-size:20px;line-height:1.3;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+    .hero p{margin:0 0 16px;font-size:15px;line-height:1.5;color:var(--soft)}
+
+    .btn-outline{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 16px;border:1px solid #6C6F72;border-radius:999px;
+      font-size:14px;font-weight:600;color:var(--ink);text-decoration:none;
+      transition:background .15s ease,border-color .15s ease;
+    }
+    .btn-outline:hover{background:#F1F1F1;border-color:var(--ink)}
+    .btn-outline svg{width:15px;height:15px}
+
+    /* ---------- Promociones apiladas ---------- */
+    .stack{display:flex;flex-direction:column;gap:30px;min-width:0}
+    .promo{position:relative;display:flex;flex-direction:column;justify-content:flex-end;flex:1;padding:12px;overflow:hidden}
+    .promo:first-child{flex:1.22}
+    .promo>img{
+      position:absolute;inset:12px;width:calc(100% - 24px);height:calc(100% - 24px);
+      object-fit:cover;border-radius:16px;
+    }
+    .stack .promo:first-child>img{object-position:left center}
+    .promo__panel{
+      position:relative;margin:0 13px 8px;padding:17px 19px 15px;
+      background:#fff;border-radius:16px;
+      box-shadow:0 18px 40px -24px rgba(0,0,0,.55);
+    }
+    .promo h3{margin:0 0 6px;font-size:16.5px;line-height:1.3;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+    .promo p{margin:0 0 12px;font-size:14px;line-height:1.5;color:var(--soft)}
+    .promo .link{font-size:14px}
+
+    .link{
+      display:inline-flex;align-items:center;gap:6px;width:max-content;
+      font-weight:600;color:var(--blue);text-decoration:none;
+      border-bottom:1px solid transparent;
+    }
+    .link:hover{border-color:currentColor}
+    .link svg{width:14px;height:14px}
+
+    /* ---------- Login ---------- */
+    .login-wrap{display:flex;min-width:0}
+    .login{padding:40px 36px 26px;display:flex;flex-direction:column;flex:1;min-height:780px}
+    .login__inner{display:flex;flex-direction:column;flex:1;width:100%;max-width:460px;margin:0 auto}
+
+    .login__logo{display:block;width:170px;height:auto;margin:42px auto 34px}
+
+    .login h1{margin:0 0 22px;font-size:22px;line-height:1.25;font-weight:500;letter-spacing:-.01em;color:#1F2328}
+
+    .form{display:flex;flex-direction:column;width:100%}
+
+    .field{position:relative;margin-bottom:16px}
+
+    .control{
+      width:100%;height:64px;border:1.5px solid var(--line);border-radius:8px;
+      background:#fff;padding:23px 16px 9px;
+      font:inherit;font-size:16px;color:var(--ink);
+      transition:border-color .15s ease,box-shadow .15s ease;
+    }
+    .control::placeholder{color:transparent}
+    .control:hover{border-color:#8C8B8B}
+    .control:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(31,95,168,.12)}
+
+    .field>label,
+    .field .pass>label{
+      position:absolute;left:16px;top:50%;transform:translateY(-50%);
+      font-size:15.5px;line-height:1;color:var(--muted);pointer-events:none;
+      transition:top .15s ease,font-size .15s ease,color .15s ease,transform .15s ease;
+    }
+    .field .control:focus~label,
+    .field .control:not(:placeholder-shown)~label,
+    .field.is-filled>label{
+      top:13px;transform:none;font-size:12px;font-weight:500;color:var(--blue);
+    }
+
+    select.control{
+      appearance:none;-webkit-appearance:none;padding-right:46px;
+      background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%236C6F72' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 16px center;
+    }
+
+    .pass{position:relative}
+    .pass .control{padding-right:52px}
+    .pass__toggle{
+      position:absolute;right:6px;top:50%;transform:translateY(-50%);
+      width:40px;height:40px;border:0;border-radius:8px;background:transparent;
+      display:grid;place-items:center;cursor:pointer;color:var(--muted);
+    }
+    .pass__toggle:hover{background:#F1F1F1;color:var(--ink)}
+    .pass__toggle svg{width:19px;height:19px}
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      border:0;font:inherit;font-weight:700;text-decoration:none;cursor:pointer;
+      transition:background .15s ease,transform .08s ease;
+    }
+    .btn-primary{
+      width:100%;height:54px;margin-top:10px;border-radius:999px;
+      background:var(--red);color:#fff;
+      font-size:13.5px;letter-spacing:.08em;text-transform:uppercase;
+    }
+    .btn-primary:hover:not(:disabled){background:var(--red-600)}
+    .btn-primary:active:not(:disabled){transform:translateY(1px)}
+    .btn-primary:disabled{background:#D5D9E2;color:#fff;cursor:not-allowed}
+
+    .login__help{
+      display:flex;align-items:center;gap:7px;width:max-content;
+      margin:18px 0 0;font-size:15px;font-weight:500;color:var(--blue);text-decoration:none;
+    }
+    .login__help:hover{text-decoration:underline}
+    .login__help svg{width:16px;height:16px;flex:none}
+
+    .login__links{margin-top:28px}
+    .login__q{margin:0 0 8px;text-align:center;font-size:14px;line-height:1.7;color:var(--muted)}
+    .login__q:last-child{margin:14px 0 0}
+    .login__q a{color:var(--blue);text-decoration:none;font-weight:600}
+    .login__q a:hover{text-decoration:underline}
+    .login__q--bold{font-size:15px}
+    .login__q--bold a{font-weight:700}
+
+    .login__secure{
+      display:flex;align-items:center;justify-content:center;gap:7px;
+      margin-top:auto;padding-top:26px;font-size:11.5px;color:#8C8B8B;text-align:center;
+    }
+    .login__secure svg{width:13px;height:13px;flex:none}
+
+    /* ---------- Pie: línea de atención + aviso ---------- */
+    .foot{
+      max-width:1228px;margin:30px auto 0;padding:22px 26px 18px;
+      background:rgba(255,255,255,.97);border-radius:20px;box-shadow:var(--shadow);
+    }
+    .foot h2{margin:0 0 12px;font-size:16px;font-weight:700;letter-spacing:-.01em}
+    .foot__contact{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 26px}
+    .foot__national{display:flex;align-items:baseline;gap:10px;margin:0;font-size:14px;color:var(--muted)}
+    .foot__national b{color:var(--ink);font-weight:600}
+    .foot__cities{display:flex;flex-wrap:wrap;gap:9px 22px;margin:0;padding:0;list-style:none}
+    .foot__cities li{display:flex;align-items:center;gap:7px;font-size:13.5px;color:var(--soft)}
+    .foot__cities b{font-weight:600;color:var(--ink)}
+    .foot__city{display:inline-flex;align-items:baseline;gap:6px}
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--red);flex:none}
+
+    .foot__legal{
+      display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 18px;
+      margin-top:18px;padding-top:14px;border-top:1px solid var(--line-soft);
+      font-size:12px;color:var(--muted);
+    }
+    .foot__legal p{margin:0;max-width:72ch;line-height:1.5}
+    .foot__legal a{color:var(--blue);font-weight:600;text-decoration:none}
+    .foot__legal a:hover{text-decoration:underline}
+
+    /* ---------- Modales ---------- */
+    .modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px}
+    .modal[hidden]{display:none}
+    .modal__backdrop{position:absolute;inset:0;background:rgba(20,20,20,.62);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+    .modal__card{
+      position:relative;width:min(560px,100%);max-height:calc(100vh - 40px);overflow:auto;
+      background:#fff;border-radius:20px;padding:32px;
+      box-shadow:0 40px 80px -30px rgba(0,0,0,.6);
+      animation:pop .22s ease;
+    }
+    .modal__card:focus{outline:none}
+    @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+
+    .modal__icon{width:52px;height:52px;border-radius:16px;margin-bottom:18px;background:#FDE8EA;color:var(--red);display:grid;place-items:center}
+    .modal__icon svg{width:26px;height:26px}
+    .kicker{margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red)}
+    .modal h2{margin:0 0 12px;font-size:26px;line-height:1.15;letter-spacing:-.02em}
+    .modal p{margin:0 0 16px;font-size:14.5px;line-height:1.6;color:#4A5361}
+
+    .signals{list-style:none;padding:0;margin:0 0 18px;display:grid;gap:10px}
+    .signals li{display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:start;font-size:13.5px;line-height:1.5;color:#3D4654}
+    .signals b{color:var(--ink)}
+    .signals code{background:#F1F1F1;border-radius:5px;padding:1px 5px;font-size:12.5px;word-break:break-word}
+
+    .tip{margin:0 0 4px;padding:14px 16px;border-radius:12px;background:#FFF7E8;border:1px solid #F5E2BB;font-size:13px;line-height:1.55;color:#6B5420}
+
+    .modal__actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+    .btn-red{height:46px;padding:0 20px;background:var(--red);color:#fff;font-size:14px;border-radius:999px}
+    .btn-red:hover{background:var(--red-600)}
+    .btn-ghost{height:46px;padding:0 20px;background:#F1F1F1;color:#2A3342;font-size:14px;border-radius:999px;border:1px solid var(--line-soft)}
+    .btn-ghost:hover{background:#E9E9E9}
+
+    .guide{width:min(620px,100%)}
+    .guide h3{margin:18px 0 7px;font-size:15px;color:var(--ink)}
+    .guide ul{margin:0 0 13px;padding-left:18px;font-size:13.5px;line-height:1.6;color:#4A5361}
+    .guide li{margin-bottom:5px}
+    .guide .ref{font-size:12px;color:#8C8B8B;border-top:1px solid var(--line-soft);padding-top:14px;margin-top:20px}
+
+    /* ---------- Flujo de inicio de sesión ---------- */
+    .modal--flow .modal__backdrop{
+      background:rgba(20,20,20,.22);
+      -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+    }
+    #m-loading .modal__backdrop{
+      background:rgba(20,20,20,.45);
+      -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    }
+
+    .flow-card{
+      width:min(640px,100%);padding:52px 56px 38px;border-radius:20px;
+      position:relative;overflow:hidden;text-align:center;
+    }
+    .flow-card .blob{position:absolute;pointer-events:none}
+    .blob--tr{width:96px;height:96px;right:-14px;top:-14px;background:#FDE8EA;border-radius:50% 50% 0 50%}
+    .blob--bl{width:74px;height:74px;left:16px;bottom:14px;border:2px solid #F7C9CE;border-radius:50% 50% 50% 0}
+
+    .flow-logo{position:relative;z-index:1;display:block;width:232px;height:auto;margin:0 auto 28px}
+    .flow-card h2{position:relative;z-index:1;margin:0 auto 14px;max-width:500px;font-size:30px;line-height:1.25;font-weight:700;letter-spacing:-.02em}
+    .flow-card .flow-sub{position:relative;z-index:1;margin:0 auto;max-width:430px;font-size:16px;line-height:1.5;color:var(--muted)}
+    .flow-status{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:12px;margin-top:30px;font-size:16px;color:var(--ink)}
+    .spinner{width:22px;height:22px;flex:none;border-radius:50%;border:3px solid #F6DDE0;border-top-color:var(--red);animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .flow-card .flow-foot{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:12px;margin:46px 0 0;font-size:13px;color:#8C8B8B}
+    .flow-line{width:26px;height:1px;background:#D5D5D5}
+
+    .otp-card{
+      width:min(600px,100%);padding:38px 40px 34px;border-radius:16px;
+      position:relative;text-align:center;
+    }
+    .otp-close{
+      position:absolute;top:12px;right:12px;width:38px;height:38px;
+      border:0;border-radius:8px;background:transparent;display:grid;place-items:center;
+      cursor:pointer;color:#6C6F72;
+    }
+    .otp-close:hover{background:#F1F1F1;color:var(--ink)}
+    .otp-close svg{width:22px;height:22px}
+    .otp-lock{display:block;width:150px;height:auto;margin:6px auto 16px}
+    .otp-card h2{margin:0 0 10px;font-size:28px;line-height:1.2;font-weight:700;letter-spacing:-.02em}
+    .otp-card .otp-text{margin:0 auto;max-width:440px;font-size:16px;line-height:1.5;color:var(--soft)}
+    .otp-inputs{display:flex;justify-content:center;gap:12px;margin:26px 0 0}
+    .otp{
+      width:48px;height:48px;border:1.5px solid #C9CCD2;border-radius:8px;background:#fff;
+      text-align:center;font:inherit;font-size:20px;font-weight:600;color:var(--ink);
+    }
+    .otp:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(31,95,168,.12)}
+    .otp-card .otp-note{margin:22px auto 0;max-width:450px;font-size:14px;line-height:1.5;color:var(--muted)}
+    .otp-continue{width:min(330px,100%);height:54px;margin:24px auto 0;border-radius:999px;background:var(--red);color:#fff;font-size:15px;font-weight:600}
+    .otp-continue:hover:not(:disabled){background:var(--red-600)}
+    .otp-continue:disabled{background:#D5D9E2;color:#fff;cursor:not-allowed}
+
+    /* ---------- Datos que quedaron registrados ---------- */
+    .capture{margin:0 0 18px;padding:12px 16px;border:1px solid var(--line-soft);border-radius:12px;background:#FAFAFA}
+    .capture .capture__title{margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+    .capture__row{display:grid;grid-template-columns:92px 1fr auto;align-items:center;gap:10px;padding:8px 0}
+    .capture__row+.capture__row{border-top:1px solid #ECECEC}
+    .capture__label{font-size:13px;color:var(--muted)}
+    .capture__value{font-size:14px;font-weight:600;letter-spacing:.06em;color:var(--ink);overflow-wrap:anywhere}
+    .capture__btn{
+      border:1px solid var(--line-soft);border-radius:999px;background:#fff;
+      padding:5px 12px;font:inherit;font-size:12px;font-weight:600;color:var(--blue);
+      cursor:pointer;
+    }
+    .capture__btn:hover{background:#F1F1F1}
+
+    /* ---------- Responsive ---------- */
+    @media (max-width:1080px){
+      .page-bg{display:none}
+      .grid{grid-template-columns:1fr 1fr}
+      .login-wrap{grid-column:1 / -1;order:-1}
+      .login{min-height:0;padding-bottom:32px}
+      .login__logo{margin-top:20px}
+      .hero{min-height:520px}
+      .foot{max-width:none}
+    }
+
+    @media (max-width:720px){
+      .page{padding:0 14px 18px}
+
+      .eyebrow{
+        background:var(--red);color:#fff;
+        margin:0 -14px;padding:16px 20px 12px;
+        font-size:17px;
+      }
+
+      .grid{grid-template-columns:1fr;gap:20px}
+      .hero,.stack{display:none}
+
+      .login-wrap{
+        order:-1;grid-column:auto;
+        margin:0 -14px;padding:14px;
+        background:var(--red);border-radius:0 0 26px 26px;
+      }
+      .login{padding:28px 22px 40px;border-radius:20px;box-shadow:none}
+      .login__inner{max-width:none}
+      .login__logo{width:150px;margin:10px auto 26px}
+      .login h1{font-size:22px;margin-bottom:18px}
+      .login__help{font-size:15px}
+
+      .foot{margin:18px 0 0;padding:20px;border-radius:18px}
+      .foot__cities{display:grid;grid-template-columns:1fr 1fr;gap:14px 12px}
+      .foot__cities li{align-items:flex-start}
+      .foot__city{display:flex;flex-direction:column;gap:1px}
+      .foot__cities .dot{margin-top:6px}
+      .foot__legal{display:block}
+      .foot__legal a{display:inline-block;margin-top:8px}
+
+      .modal{padding:12px}
+      .modal__card{padding:24px;border-radius:16px}
+      .modal h2{font-size:22px}
+
+      .flow-card{padding:34px 22px 28px;border-radius:18px}
+      .blob--tr{width:72px;height:72px;right:-12px;top:-12px}
+      .blob--bl{width:54px;height:54px;left:12px;bottom:10px}
+      .flow-logo{width:190px;margin-bottom:22px}
+      .flow-card h2{font-size:22px}
+      .flow-card .flow-sub{font-size:14px}
+      .flow-status{font-size:14px;margin-top:24px}
+      .flow-card .flow-foot{margin-top:28px}
+      .otp-card{padding:30px 18px 26px}
+      .otp-lock{width:120px}
+      .otp-card h2{font-size:23px}
+      .otp-card .otp-text{font-size:14px}
+      .otp-card .otp-note{font-size:12.5px}
+      .otp-inputs{gap:8px}
+      .otp{width:42px;height:46px;font-size:18px}
+      .otp-continue{height:50px;font-size:13px}
+      .capture{padding:10px 12px}
+      .capture__row{grid-template-columns:74px 1fr auto;gap:8px}
+      .capture__label{font-size:12.5px}
+      .capture__value{font-size:13.5px}
+      .capture__btn{padding:5px 10px}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation:none!important;transition:none!important}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-bg" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <main class="page">
+    <p class="eyebrow">Juntos trabajando</p>
+
+    <div class="grid">
+
+      <!-- ============ Promoción principal ============ -->
+      <article class="card hero">
+        <div class="hero__media">
+          <img src="img/Banner-card_modal_lg.webp" width="900" height="1280" alt="Eleva tu Rentabilidad">
+        </div>
+        <div class="hero__body">
+          <h2>Con un CDT o un Bolsillo con Rentabilidad</h2>
+          <p>Ábrelos en línea y recibe tus rendimientos en tu Cuenta de Ahorros AV Villas</p>
+          <a class="btn-outline" href="#" onclick="return false;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            Conoce más
+          </a>
+        </div>
+      </article>
+
+      <!-- ============ Promociones ============ -->
+      <div class="stack">
+
+        <article class="card promo">
+          <img src="img/Banner-card_2_new.webp" width="1000" height="751" alt="Pasa o recibe plata desde Bre-B">
+          <div class="promo__panel">
+            <h3>Pasa o recibe plata desde Bre-B</h3>
+            <p>Hazlo fácil y de forma inmediata a través de tus llaves</p>
+            <a class="link" href="#" onclick="return false;">Conoce más
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="card promo">
+          <img src="img/Banner-card_3_new.webp" width="1000" height="755" alt="Trae tu nómina a AV Villas">
+          <div class="promo__panel">
+            <h3>Trae tu nómina a AV Villas</h3>
+            <p>y recibe tu salario en una Cuenta con beneficios y condiciones exclusivas.</p>
+            <a class="link" href="#" onclick="return false;">Abre tu cuenta
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+            </a>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- ============ Login ============ -->
+      <div class="login-wrap">
+        <section class="card login" aria-labelledby="login-title">
+          <div class="login__inner">
+
+            <img class="login__logo" src="img/brand-primary.svg" width="192" height="62" alt="AV Villas">
+
+            <h1 id="login-title">Ingresa a tu Co-banking</h1>
+
+            <!-- El formulario NO tiene action ni backend: nunca se envían datos. -->
+            <form class="form" id="loginForm" novalidate autocomplete="off">
+              <div class="field is-filled">
+                <select class="control" id="tipoDoc" name="tipoDoc">
+                  <option>Cédula de Ciudadanía</option>
+                  <option>Cédula de Extranjería</option>
+                  <option>Pasaporte</option>
+                  <option>Tarjeta de identidad</option>
+                  <option>NIT</option>
+                </select>
+                <label for="tipoDoc">Tipo de documento</label>
+              </div>
+
+              <div class="field">
+                <input class="control" id="documento" name="documento" type="text" inputmode="numeric" placeholder=" " autocomplete="off" data-lpignore="true" spellcheck="false">
+                <label for="documento">Número de documento</label>
+              </div>
+
+              <div class="field">
+                <div class="pass">
+                  <input class="control" id="clave" name="clave" type="password" placeholder=" " autocomplete="off" data-lpignore="true">
+                  <label for="clave">Ingresa tu contraseña</label>
+                  <button type="button" class="pass__toggle" id="togglePass" aria-label="Mostrar contraseña" aria-pressed="false">
+                    <svg class="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg class="i-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="M2 12s3.6-7 10-7c2 0 3.7.6 5.1 1.5"/><path d="M22 12s-3.6 7-10 7c-2 0-3.7-.6-5.1-1.5"/><path d="M4 4l16 16"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <button class="btn btn-primary" id="ingresar" type="submit" disabled>Ingresar</button>
+
+              <a class="login__help" href="#" onclick="return false;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                Olvidé mi contraseña
+              </a>
+            </form>
+
+            <div class="login__links">
+              <p class="login__q">¿Aún no tienes contraseña para ingresar?<br><a href="#" onclick="return false;">Regístrate</a></p>
+              <p class="login__q login__q--bold"><a href="#" onclick="return false;">¿Tienes problemas para ingresar?</a></p>
+            </div>
+
+            <div class="login__secure">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+              Simulación: ningún dato se envía ni se almacena.
+            </div>
+
+          </div>
+        </section>
+      </div>
+
+    </div>
+
+    <!-- ============ Línea de atención + aviso ============ -->
+    <footer class="foot">
+      <h2>Línea Audiovillas</h2>
+      <div class="foot__contact">
+        <p class="foot__national"><span>Nacional</span> <b>01 8000 51 8000</b></p>
+        <ul class="foot__cities">
+          <li><span class="dot" aria-hidden="true"></span><span class="foot__city"><b>Bogotá</b> <span>(601) 4441777</span></span></li>
+          <li><span class="dot" aria-hidden="true"></span><span class="foot__city"><b>Medellín</b> <span>(604) 3256000</span></span></li>
+          <li><span class="dot" aria-hidden="true"></span><span class="foot__city"><b>Barranquilla</b> <span>(605) 3304330</span></span></li>
+          <li><span class="dot" aria-hidden="true"></span><span class="foot__city"><b>Bucaramanga</b> <span>(607) 6302980</span></span></li>
+          <li><span class="dot" aria-hidden="true"></span><span class="foot__city"><b>Cali</b> <span>(602) 8859595</span></span></li>
+        </ul>
+      </div>
+      <div class="foot__legal">
+        <p>Proyecto educativo del Taller de Auditoría y Seguridad. No está afiliado a AV Villas, Grupo Aval ni a ninguna entidad financiera. Ningún dato se envía ni se almacena.</p>
+        <a href="#" data-open="m-guia">¿Cómo detectar un phishing?</a>
+      </div>
+    </footer>
+  </main>
+
+  <!-- ============ Modal: abriendo sesión ============ -->
+  <div class="modal modal--flow" id="m-loading" hidden data-locked>
+    <div class="modal__backdrop"></div>
+    <div class="modal__card flow-card" role="dialog" aria-modal="true" aria-labelledby="loading-title" tabindex="-1">
+      <span class="blob blob--tr" aria-hidden="true"></span>
+      <span class="blob blob--bl" aria-hidden="true"></span>
+      <img class="flow-logo" src="img/brand-primary.svg" width="192" height="62" alt="AV Villas">
+      <h2 id="loading-title">Un momento, estamos abriendo tu sesión</h2>
+      <p class="flow-sub">Cargamos tus productos y movimientos más recientes.</p>
+      <div class="flow-status" role="status" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Verificando tus datos</span>
+      </div>
+      <p class="flow-foot"><span class="flow-line" aria-hidden="true"></span> Juntos trabajando</p>
+    </div>
+  </div>
+
+  <!-- ============ Modal: clave temporal ============ -->
+  <div class="modal modal--flow" id="m-otp" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card otp-card" role="dialog" aria-modal="true" aria-labelledby="otp-title" tabindex="-1">
+      <button type="button" class="otp-close" data-close aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+
+      <img class="otp-lock" src="img/forgot-password.svg" width="92" height="70" alt="">
+      <h2 id="otp-title">Revisa tu celular</h2>
+      <p class="otp-text">Por tu seguridad hemos enviado una clave temporal a tu celular registrado.</p>
+
+      <div class="otp-inputs" role="group" aria-label="Clave temporal de 6 dígitos">
+        <input class="otp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="Dígito 1">
+        <input class="otp" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 2">
+        <input class="otp" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 3">
+        <input class="otp" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 4">
+        <input class="otp" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 5">
+        <input class="otp" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 6">
+      </div>
+
+      <p class="otp-note">Dependiendo de tu operador de telefonía móvil, el envío puede tomar hasta 1 minuto.</p>
+      <button type="button" class="btn otp-continue" id="otpContinue" disabled>Continuar</button>
+    </div>
+  </div>
+
+  <!-- ============ Modal: resultado de la simulación ============ -->
+  <div class="modal" id="m-sim" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="sim-title" tabindex="-1">
+      <div class="modal__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+      </div>
+      <p class="kicker">Simulación completada</p>
+      <h2 id="sim-title">Acabas de caer en un phishing</h2>
+      <p>Escribiste tu documento, tu contraseña y un código de verificación en una página que imita el portal Co-banking de AV Villas. En un ataque real, esos datos ya estarían en manos del atacante. Aquí no se envió ni se guardó nada: los campos se acaban de vaciar.</p>
+
+      <div class="capture">
+        <p class="capture__title">Esto es lo que escribiste</p>
+        <div class="capture__row">
+          <span class="capture__label">Usuario</span>
+          <span class="capture__value" id="capUser" data-mask="10">••••••••••</span>
+          <button type="button" class="capture__btn" data-reveal="capUser" aria-pressed="false">Ver</button>
+        </div>
+        <div class="capture__row">
+          <span class="capture__label">Contraseña</span>
+          <span class="capture__value" id="capPass" data-mask="10">••••••••••</span>
+          <button type="button" class="capture__btn" data-reveal="capPass" aria-pressed="false">Ver</button>
+        </div>
+        <div class="capture__row">
+          <span class="capture__label">Código</span>
+          <span class="capture__value" id="capOtp" data-mask="6">••••••</span>
+          <button type="button" class="capture__btn" data-reveal="capOtp" aria-pressed="false">Ver</button>
+        </div>
+      </div>
+
+      <ul class="signals">
+        <li><span aria-hidden="true">1.</span><span><b>La dirección no era la oficial.</b> Un dominio parecido —por ejemplo <code>co-banking-seguro.com</code>— basta para engañar.</span></li>
+        <li><span aria-hidden="true">2.</span><span><b>El segundo factor también se entrega.</b> El código de 6 dígitos se escribe en la misma página falsa; con él, el atacante completa el inicio de sesión.</span></li>
+        <li><span aria-hidden="true">3.</span><span><b>La marca se copia fácil.</b> Colores, logo y diseño idénticos no garantizan que el sitio sea legítimo.</span></li>
+        <li><span aria-hidden="true">4.</span><span><b>La prisa es la herramienta del atacante.</b> «Tu cuenta será bloqueada» busca que actúes sin verificar.</span></li>
+      </ul>
+
+      <p class="tip"><b>Regla de oro:</b> entra siempre por la app oficial o escribiendo la dirección a mano. Nunca compartas códigos de verificación ni contraseñas por enlace, correo o mensaje.</p>
+
+      <div class="modal__actions">
+        <button type="button" class="btn btn-red" data-close>Entendido</button>
+        <button type="button" class="btn btn-ghost" data-open="m-guia" data-close-first>Ver guía completa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Modal: guía rápida ============ -->
+  <div class="modal" id="m-guia" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card guide" role="dialog" aria-modal="true" aria-labelledby="guia-title" tabindex="-1">
+      <p class="kicker">Guía rápida</p>
+      <h2 id="guia-title">Phishing y quishing en 60 segundos</h2>
+      <p><b>Phishing</b> es un engaño de ingeniería social: alguien se hace pasar por una entidad de confianza para que entregues credenciales, datos o dinero. No hackea la tecnología, convence a la persona.</p>
+
+      <h3>Señales que debes mirar</h3>
+      <ul>
+        <li>Urgencia o amenaza: «tu cuenta será bloqueada», «última advertencia».</li>
+        <li>Dominio parecido pero no idéntico al oficial.</li>
+        <li>El enlace visible no coincide con el destino real.</li>
+        <li>Piden contraseñas, códigos de verificación o datos que nadie debería pedir por ese canal.</li>
+        <li>Adjuntos inesperados o un canal raro para el contexto (WhatsApp para un tema corporativo).</li>
+      </ul>
+
+      <h3>Quishing: el QR como anzuelo</h3>
+      <p>Es el mismo engaño con un código QR. Oculta la dirección de destino, evita filtros que no leen imágenes y suele abrirse en el celular, que tiene menos protección. También se pega un QR falso encima del real en carteles, menús o facturas.</p>
+      <ul>
+        <li>Antes de abrir, verifica la URL que muestra la app de escaneo.</li>
+        <li>Desconfía de QR en espacios públicos o sobrepuestos.</li>
+        <li>No introduzcas datos de acceso después de escanear un QR.</li>
+      </ul>
+
+      <h3>Cómo se controla (mirada de auditoría)</h3>
+      <ul>
+        <li><b>Técnico:</b> filtrado de correo, SPF/DKIM/DMARC, MFA resistente a phishing (passkeys/FIDO2).</li>
+        <li><b>Humano:</b> capacitación y simulaciones periódicas, cultura de reporte sin castigo.</li>
+        <li><b>Proceso:</b> canal único de reporte, respuesta ante incidentes y métricas de clics/reportes.</li>
+      </ul>
+
+      <p class="ref">Referencias: ISO/IEC 27001:2022 (A.6.3, A.8.5) · NIST CSF 2.0 (PR.AT, PR.AA) · NIST SP 800-53 (AT-2). Esta página no envía ni almacena datos, no usa cookies ni se comunica con ningún servidor.</p>
+
+      <div class="modal__actions">
+        <button type="button" class="btn btn-red" data-close>Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var $ = function (sel, root) { return (root || document).querySelector(sel); };
+      var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+
+      /* 1. Mostrar / ocultar contraseña */
+      var pass = $("#clave");
+      var toggle = $("#togglePass");
+      var eye = $(".i-eye", toggle);
+      var eyeOff = $(".i-eye-off", toggle);
+
+      toggle.addEventListener("click", function () {
+        var show = pass.type === "password";
+        pass.type = show ? "text" : "password";
+        toggle.setAttribute("aria-pressed", String(show));
+        toggle.setAttribute("aria-label", show ? "Ocultar contraseña" : "Mostrar contraseña");
+        eye.hidden = show;
+        eyeOff.hidden = !show;
+        pass.focus();
+      });
+
+      /* 2. Habilitar el botón con documento y contraseña */
+      var doc = $("#documento");
+      var submit = $("#ingresar");
+
+      function sync() {
+        submit.disabled = doc.value.trim().length < 4 || pass.value.length < 1;
+      }
+      [doc, pass].forEach(function (el) { el.addEventListener("input", sync); });
+      sync();
+
+      /* 3. Flujo simulado: cargando sesión → clave temporal → explicación */
+      var loadingModal = $("#m-loading");
+      var otpModal = $("#m-otp");
+      var otpInputs = $$(".otp");
+      var otpContinue = $("#otpContinue");
+
+      /* Datos que se muestran en la explicación (solo en memoria). */
+      var captured = { doc: "", pass: "", otp: "" };
+      var captureValues = { capUser: "", capPass: "", capOtp: "" };
+      var capUser = $("#capUser");
+      var capPass = $("#capPass");
+      var capOtp = $("#capOtp");
+
+      function maskFor(el) {
+        var n = parseInt(el.getAttribute("data-mask"), 10) || 10;
+        return new Array(n + 1).join("•");
+      }
+
+      function paintMasked(el) { el.textContent = maskFor(el); }
+
+      function setCapture() {
+        captureValues.capUser = captured.doc;
+        captureValues.capPass = captured.pass;
+        captureValues.capOtp = captured.otp;
+        [capUser, capPass, capOtp].forEach(paintMasked);
+        $$(".capture__btn").forEach(function (btn) {
+          btn.textContent = "Ver";
+          btn.setAttribute("aria-pressed", "false");
+        });
+      }
+
+      function clearCapture() {
+        captured = { doc: "", pass: "", otp: "" };
+        captureValues = { capUser: "", capPass: "", capOtp: "" };
+        [capUser, capPass, capOtp].forEach(paintMasked);
+        $$(".capture__btn").forEach(function (btn) {
+          btn.textContent = "Ver";
+          btn.setAttribute("aria-pressed", "false");
+        });
+      }
+
+      function resetOtp() {
+        otpInputs.forEach(function (input) { input.value = ""; });
+        otpContinue.disabled = true;
+      }
+
+      function syncOtp() {
+        var complete = otpInputs.every(function (input) { return input.value.length === 1; });
+        otpContinue.disabled = !complete;
+      }
+
+      otpInputs.forEach(function (input, index) {
+        input.addEventListener("input", function () {
+          input.value = input.value.replace(/\D/g, "").slice(-1);
+          if (input.value && index < otpInputs.length - 1) otpInputs[index + 1].focus();
+          syncOtp();
+        });
+
+        input.addEventListener("keydown", function (event) {
+          if (event.key === "Backspace" && !input.value && index > 0) {
+            event.preventDefault();
+            otpInputs[index - 1].value = "";
+            otpInputs[index - 1].focus();
+            syncOtp();
+          }
+          if (event.key === "Enter" && !otpContinue.disabled) {
+            event.preventDefault();
+            finishLogin();
+          }
+        });
+
+        input.addEventListener("paste", function (event) {
+          var data = event.clipboardData || window.clipboardData;
+          var digits = (data ? data.getData("text") : "").replace(/\D/g, "").slice(0, 6).split("");
+          if (!digits.length) return;
+          event.preventDefault();
+          otpInputs.forEach(function (el, i) { el.value = digits[i] || ""; });
+          syncOtp();
+          otpInputs[Math.min(digits.length, otpInputs.length) - 1].focus();
+        });
+      });
+
+      function finishLogin() {
+        captured.otp = otpInputs.map(function (input) { return input.value; }).join("");
+        setCapture();
+        closeModal(otpModal, false);
+        resetOtp();
+        openModal("m-sim");
+      }
+
+      otpContinue.addEventListener("click", finishLogin);
+
+      $("#loginForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (submit.disabled) return;
+
+        captured.doc = doc.value.trim();
+        captured.pass = pass.value;
+
+        /* No se envía nada: los datos se limpian del formulario. */
+        pass.value = "";
+        doc.value = "";
+        sync();
+
+        openModal("m-loading");
+        window.setTimeout(function () {
+          closeModal(loadingModal, false);
+          resetOtp();
+          openModal("m-otp");
+          window.setTimeout(function () { otpInputs[0].focus(); }, 60);
+        }, 2200);
+      });
+
+      /* 4. Modales accesibles */
+      var lastFocus = null;
+
+      function openModal(id) {
+        var modal = document.getElementById(id);
+        if (!modal || !modal.hidden) return;
+        lastFocus = document.activeElement;
+        modal.hidden = false;
+        document.body.style.overflow = "hidden";
+        var card = $(".modal__card", modal);
+        window.requestAnimationFrame(function () { card.focus(); });
+      }
+
+      function closeModal(modal, restoreFocus) {
+        if (!modal) return;
+        modal.hidden = true;
+        if (modal.id === "m-sim") clearCapture();
+        if (!$$(".modal:not([hidden])").length) document.body.style.overflow = "";
+        if (restoreFocus !== false && lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+      }
+
+      document.addEventListener("click", function (event) {
+        var reveal = event.target.closest("[data-reveal]");
+        if (reveal) {
+          var target = document.getElementById(reveal.getAttribute("data-reveal"));
+          var shown = reveal.getAttribute("aria-pressed") === "true";
+          var value = captureValues[target.id] || "";
+          target.textContent = shown ? maskFor(target) : (value || maskFor(target));
+          reveal.textContent = shown ? "Ver" : "Ocultar";
+          reveal.setAttribute("aria-pressed", String(!shown));
+          return;
+        }
+
+        var opener = event.target.closest("[data-open]");
+        if (opener) {
+          if (opener.hasAttribute("data-close-first")) {
+            var current = opener.closest(".modal");
+            if (current) closeModal(current);
+          }
+          openModal(opener.getAttribute("data-open"));
+          return;
+        }
+        if (event.target.closest("[data-close]")) {
+          var modal = event.target.closest(".modal");
+          closeModal(modal);
+          if (modal && modal.id === "m-otp") { resetOtp(); clearCapture(); }
+        }
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          var open = $$(".modal:not([hidden])").pop();
+          if (!open || open.hasAttribute("data-locked")) return;
+          closeModal(open);
+          if (open.id === "m-otp") { resetOtp(); clearCapture(); }
+          return;
+        }
+        if (event.key !== "Tab") return;
+
+        var modal = $$(".modal:not([hidden])").pop();
+        if (!modal) return;
+
+        var focusable = $$("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])", modal)
+          .filter(function (el) { return !el.disabled && el.offsetParent !== null; });
+        if (!focusable.length) return;
+
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
